@@ -1,30 +1,55 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Maven Check') {
-            steps {
-                sh 'docker run -i --rm --name my-maven-project maven:3.9.9 mvn --version'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'docker run -i --rm --name my-maven-project -v ""C:\\Users\\Admin\\Documents\\PSU\\Year4\\Term1\\Mobile\\Kitwara\\Learn Jenkins\\Test\\CI CD\\java-hello-world-with-maven:/usr/src/mymaven" -w /usr/src/mymaven maven:3.9.9 mvn clean install'
-            }
-        }
-        stage('SonarQube') {
-            steps {
-                sh '''#!/bin/sh
-                docker run -i --rm --name my-maven-project \
-                  -v "C:\\Users\\Admin\\Documents\\PSU\\Year4\\Term1\\Mobile\\Kitwara\\Learn Jenkins\\Test\\CI CD\\java-hello-world-with-maven:/usr/src/mymaven" \
-                  -w /usr/src/mymaven maven:3.9.9 \
-                  mvn clean verify sonar:sonar \
-                  -Dsonar.projectKey=TestCI \
-                  -Dsonar.projectName="TestCI" \
-                  -Dsonar.host.url=http://host.docker.internal:9001 \
-                  -Dsonar.token=sqp_095f871d780127e18b2d112cc9a9bd95e7d7698a
-                '''
-            }
-        }
+  environment {
+    SONAR_HOST_URL = 'http://host.docker.internal:9001'  // ถ้า SonarQube รันบนเครื่องโฮสต์ Windows
+  }
+
+  stages {
+    stage('Maven Check') {
+      steps {
+        sh '''
+          docker run --rm \
+            maven:3.9-eclipse-temurin-17 \
+            mvn -v
+        '''
+      }
     }
+
+    stage('Build') {
+      steps {
+        sh '''
+          docker run --rm \
+            --add-host=host.docker.internal:host-gateway \
+            -v "$WORKSPACE:/usr/src/mymaven" \
+            -w /usr/src/mymaven \
+            maven:3.9-eclipse-temurin-17 \
+            mvn -B clean install
+        '''
+      }
+    }
+
+    stage('SonarQube') {
+      steps {
+        withCredentials([string(credentialsId: 'sonar-token-id', variable: 'SONAR_TOKEN')]) {
+          sh '''
+            docker run --rm \
+              --add-host=host.docker.internal:host-gateway \
+              -v "$WORKSPACE:/usr/src/mymaven" \
+              -w /usr/src/mymaven \
+              maven:3.9-eclipse-temurin-17 \
+              mvn -B clean verify sonar:sonar \
+                -Dsonar.projectKey=TestCI \
+                -Dsonar.projectName=TestCI \
+                -Dsonar.host.url="$SONAR_HOST_URL" \
+                -Dsonar.token="$SONAR_TOKEN"
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    always { echo 'Pipeline completed.' }
+  }
 }
