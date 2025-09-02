@@ -16,7 +16,7 @@ pipeline {
             steps {
                 sh '''
                 docker run -i --rm --name my-maven-project \
-                  -v "C:\Users\Admin\Documents\PSU\Year4\Term1\Mobile\Kitwara\Learn Jenkins\Test\CI CD\java-hello-world-with-maven" \
+                  -v "C:/Users/Admin/Documents/PSU/Year4/Term1/Mobile/Kitwara/Learn Jenkins/Test/CI CD/java-hello-world-with-maven" \
                   -w /usr/src/mymaven maven:3.9.9 \
                   mvn clean verify sonar:sonar \
                   -Dsonar.projectKey=TestCI \
