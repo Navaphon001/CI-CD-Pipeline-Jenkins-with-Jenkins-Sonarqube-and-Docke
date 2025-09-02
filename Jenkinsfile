@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker run -i --rm --name my-maven-project -v "C:\Users\Admin\Documents\PSU\Year4\Term1\Mobile\Kitwara\Learn Jenkins\Test\CI CD\java-hello-world-with-maven\\myapp:/usr/src/mymaven" -w /usr/src/mymaven maven:3.9.9 mvn clean install'
+                sh 'docker run -i --rm --name my-maven-project -v ""C:\\Users\\Admin\\Documents\\PSU\\Year4\\Term1\\Mobile\\Kitwara\\Learn Jenkins\\Test\\CI CD\\java-hello-world-with-maven:/usr/src/mymaven" -w /usr/src/mymaven maven:3.9.9 mvn clean install'
             }
         }
         stage('SonarQube') {
